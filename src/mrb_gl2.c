@@ -1,8 +1,6 @@
 #include <mruby.h>
 
-#ifdef EMSCRIPTEN
 #include <GLES2/gl2.h>
-#endif
 
 static struct RClass *mod_gl2;
 

@@ -1,8 +1,39 @@
+/*
+ * OpenGL ES 2.0 bindings
+ *
+ * Note: GLvoid* type is now treated as a string in mruby side,
+ * I will write another mrbgem later which adds Array#pack and
+ * String#unpack to help convert between mruby arrays and
+ * native data used by OpenGL ES.
+ */
 #include <mruby.h>
 
 #include <GLES2/gl2.h>
 
+#include "mrb_gl_defs.h"
+
 static struct RClass *mod_gl2;
+
+FUNC_ARG_1(ActiveTexture, GLenum);
+FUNC_ARG_2(AttachShader, GLuint, GLuint);
+FUNC_ARG_3(BindAttribLocation, GLuint, GLuint, GLchar_p);
+FUNC_ARG_2(BindBuffer, GLenum, GLuint);
+FUNC_ARG_2(BindFramebuffer, GLenum, GLuint);
+FUNC_ARG_2(BindRenderbuffer, GLenum, GLuint);
+FUNC_ARG_2(BindTexture, GLenum, GLuint);
+FUNC_ARG_4(BlendColor, GLclampf, GLclampf, GLclampf, GLclampf);
+FUNC_ARG_1(BlendEquation, GLenum);
+FUNC_ARG_2(BlendEquationSeparate, GLenum, GLenum);
+FUNC_ARG_2(BlendFunc, GLenum, GLenum);
+FUNC_ARG_4(BlendFuncSeparate, GLenum, GLenum, GLenum, GLenum);
+FUNC_ARG_4(BufferData, GLenum, GLsizeiptr, GLvoid_p, GLenum);
+FUNC_ARG_4(BufferSubData, GLenum, GLintptr, GLsizeiptr, GLvoid_p);
+FUNC_RET_ARG_1(CheckFramebufferStatus, GLenum, GLenum);
+FUNC_ARG_1(Clear, GLbitfield);
+FUNC_ARG_4(ClearColor, GLclampf, GLclampf, GLclampf, GLclampf);
+FUNC_ARG_1(ClearDepthf, GLclampf);
+FUNC_ARG_1(ClearStencil, GLint);
+FUNC_ARG_4(ColorMask, GLboolean, GLboolean, GLboolean, GLboolean);
 
 void
 mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
@@ -10,360 +41,380 @@ mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
   mod_gl2 = mrb_define_module(mrb, "GL2");
 
   /* constants */
-  mrb_define_const(mrb, mod_gl2, "GL_ES_VERSION_2_0", mrb_fixnum_value(GL_ES_VERSION_2_0));
+  MRB_ATTACH_CONST(ES_VERSION_2_0);
 
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_BUFFER_BIT", mrb_fixnum_value(GL_DEPTH_BUFFER_BIT));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BUFFER_BIT", mrb_fixnum_value(GL_STENCIL_BUFFER_BIT));
-  mrb_define_const(mrb, mod_gl2, "GL_COLOR_BUFFER_BIT", mrb_fixnum_value(GL_COLOR_BUFFER_BIT));
+  MRB_ATTACH_CONST(DEPTH_BUFFER_BIT);
+  MRB_ATTACH_CONST(STENCIL_BUFFER_BIT);
+  MRB_ATTACH_CONST(COLOR_BUFFER_BIT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FALSE", mrb_fixnum_value(GL_FALSE));
-  mrb_define_const(mrb, mod_gl2, "GL_TRUE", mrb_fixnum_value(GL_TRUE));
+  MRB_ATTACH_CONST(FALSE);
+  MRB_ATTACH_CONST(TRUE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_POINTS", mrb_fixnum_value(GL_POINTS));
-  mrb_define_const(mrb, mod_gl2, "GL_LINES", mrb_fixnum_value(GL_LINES));
-  mrb_define_const(mrb, mod_gl2, "GL_LINE_LOOP", mrb_fixnum_value(GL_LINE_LOOP));
-  mrb_define_const(mrb, mod_gl2, "GL_LINE_STRIP", mrb_fixnum_value(GL_LINE_STRIP));
-  mrb_define_const(mrb, mod_gl2, "GL_TRIANGLES", mrb_fixnum_value(GL_TRIANGLES));
-  mrb_define_const(mrb, mod_gl2, "GL_TRIANGLE_STRIP", mrb_fixnum_value(GL_TRIANGLE_STRIP));
-  mrb_define_const(mrb, mod_gl2, "GL_TRIANGLE_FAN", mrb_fixnum_value(GL_TRIANGLE_FAN));
+  MRB_ATTACH_CONST(POINTS);
+  MRB_ATTACH_CONST(LINES);
+  MRB_ATTACH_CONST(LINE_LOOP);
+  MRB_ATTACH_CONST(LINE_STRIP);
+  MRB_ATTACH_CONST(TRIANGLES);
+  MRB_ATTACH_CONST(TRIANGLE_STRIP);
+  MRB_ATTACH_CONST(TRIANGLE_FAN);
 
-  mrb_define_const(mrb, mod_gl2, "GL_ZERO", mrb_fixnum_value(GL_ZERO));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE", mrb_fixnum_value(GL_ONE));
-  mrb_define_const(mrb, mod_gl2, "GL_SRC_COLOR", mrb_fixnum_value(GL_SRC_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_SRC_COLOR", mrb_fixnum_value(GL_ONE_MINUS_SRC_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_SRC_ALPHA", mrb_fixnum_value(GL_SRC_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_SRC_ALPHA", mrb_fixnum_value(GL_ONE_MINUS_SRC_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_DST_ALPHA", mrb_fixnum_value(GL_DST_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_DST_ALPHA", mrb_fixnum_value(GL_ONE_MINUS_DST_ALPHA));
+  MRB_ATTACH_CONST(ZERO);
+  MRB_ATTACH_CONST(ONE);
+  MRB_ATTACH_CONST(SRC_COLOR);
+  MRB_ATTACH_CONST(ONE_MINUS_SRC_COLOR);
+  MRB_ATTACH_CONST(SRC_ALPHA);
+  MRB_ATTACH_CONST(ONE_MINUS_SRC_ALPHA);
+  MRB_ATTACH_CONST(DST_ALPHA);
+  MRB_ATTACH_CONST(ONE_MINUS_DST_ALPHA);
 
-  mrb_define_const(mrb, mod_gl2, "GL_DST_COLOR", mrb_fixnum_value(GL_DST_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_DST_COLOR", mrb_fixnum_value(GL_ONE_MINUS_DST_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_SRC_ALPHA_SATURATE", mrb_fixnum_value(GL_SRC_ALPHA_SATURATE));
+  MRB_ATTACH_CONST(DST_COLOR);
+  MRB_ATTACH_CONST(ONE_MINUS_DST_COLOR);
+  MRB_ATTACH_CONST(SRC_ALPHA_SATURATE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FUNC_ADD", mrb_fixnum_value(GL_FUNC_ADD));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_EQUATION", mrb_fixnum_value(GL_BLEND_EQUATION));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_EQUATION_RGB", mrb_fixnum_value(GL_BLEND_EQUATION_RGB));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_EQUATION_ALPHA", mrb_fixnum_value(GL_BLEND_EQUATION_ALPHA));
+  MRB_ATTACH_CONST(FUNC_ADD);
+  MRB_ATTACH_CONST(BLEND_EQUATION);
+  MRB_ATTACH_CONST(BLEND_EQUATION_RGB);
+  MRB_ATTACH_CONST(BLEND_EQUATION_ALPHA);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FUNC_SUBTRACT", mrb_fixnum_value(GL_FUNC_SUBTRACT));
-  mrb_define_const(mrb, mod_gl2, "GL_FUNC_REVERSE_SUBTRACT", mrb_fixnum_value(GL_FUNC_REVERSE_SUBTRACT));
+  MRB_ATTACH_CONST(FUNC_SUBTRACT);
+  MRB_ATTACH_CONST(FUNC_REVERSE_SUBTRACT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_DST_RGB", mrb_fixnum_value(GL_BLEND_DST_RGB));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_SRC_RGB", mrb_fixnum_value(GL_BLEND_SRC_RGB));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_DST_ALPHA", mrb_fixnum_value(GL_BLEND_DST_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_SRC_ALPHA", mrb_fixnum_value(GL_BLEND_SRC_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_CONSTANT_COLOR", mrb_fixnum_value(GL_CONSTANT_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_CONSTANT_COLOR", mrb_fixnum_value(GL_ONE_MINUS_CONSTANT_COLOR));
-  mrb_define_const(mrb, mod_gl2, "GL_CONSTANT_ALPHA", mrb_fixnum_value(GL_CONSTANT_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_ONE_MINUS_CONSTANT_ALPHA", mrb_fixnum_value(GL_ONE_MINUS_CONSTANT_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND_COLOR", mrb_fixnum_value(GL_BLEND_COLOR));
+  MRB_ATTACH_CONST(BLEND_DST_RGB);
+  MRB_ATTACH_CONST(BLEND_SRC_RGB);
+  MRB_ATTACH_CONST(BLEND_DST_ALPHA);
+  MRB_ATTACH_CONST(BLEND_SRC_ALPHA);
+  MRB_ATTACH_CONST(CONSTANT_COLOR);
+  MRB_ATTACH_CONST(ONE_MINUS_CONSTANT_COLOR);
+  MRB_ATTACH_CONST(CONSTANT_ALPHA);
+  MRB_ATTACH_CONST(ONE_MINUS_CONSTANT_ALPHA);
+  MRB_ATTACH_CONST(BLEND_COLOR);
 
-  mrb_define_const(mrb, mod_gl2, "GL_ARRAY_BUFFER", mrb_fixnum_value(GL_ARRAY_BUFFER));
-  mrb_define_const(mrb, mod_gl2, "GL_ELEMENT_ARRAY_BUFFER", mrb_fixnum_value(GL_ELEMENT_ARRAY_BUFFER));
-  mrb_define_const(mrb, mod_gl2, "GL_ARRAY_BUFFER_BINDING", mrb_fixnum_value(GL_ARRAY_BUFFER_BINDING));
-  mrb_define_const(mrb, mod_gl2, "GL_ELEMENT_ARRAY_BUFFER_BINDING", mrb_fixnum_value(GL_ELEMENT_ARRAY_BUFFER_BINDING));
+  MRB_ATTACH_CONST(ARRAY_BUFFER);
+  MRB_ATTACH_CONST(ELEMENT_ARRAY_BUFFER);
+  MRB_ATTACH_CONST(ARRAY_BUFFER_BINDING);
+  MRB_ATTACH_CONST(ELEMENT_ARRAY_BUFFER_BINDING);
 
-  mrb_define_const(mrb, mod_gl2, "GL_STREAM_DRAW", mrb_fixnum_value(GL_STREAM_DRAW));
-  mrb_define_const(mrb, mod_gl2, "GL_STATIC_DRAW", mrb_fixnum_value(GL_STATIC_DRAW));
-  mrb_define_const(mrb, mod_gl2, "GL_DYNAMIC_DRAW", mrb_fixnum_value(GL_DYNAMIC_DRAW));
+  MRB_ATTACH_CONST(STREAM_DRAW);
+  MRB_ATTACH_CONST(STATIC_DRAW);
+  MRB_ATTACH_CONST(DYNAMIC_DRAW);
 
-  mrb_define_const(mrb, mod_gl2, "GL_BUFFER_SIZE", mrb_fixnum_value(GL_BUFFER_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_BUFFER_USAGE", mrb_fixnum_value(GL_BUFFER_USAGE));
+  MRB_ATTACH_CONST(BUFFER_SIZE);
+  MRB_ATTACH_CONST(BUFFER_USAGE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_CURRENT_VERTEX_ATTRIB", mrb_fixnum_value(GL_CURRENT_VERTEX_ATTRIB));
+  MRB_ATTACH_CONST(CURRENT_VERTEX_ATTRIB);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRONT", mrb_fixnum_value(GL_FRONT));
-  mrb_define_const(mrb, mod_gl2, "GL_BACK", mrb_fixnum_value(GL_BACK));
-  mrb_define_const(mrb, mod_gl2, "GL_FRONT_AND_BACK", mrb_fixnum_value(GL_FRONT_AND_BACK));
+  MRB_ATTACH_CONST(FRONT);
+  MRB_ATTACH_CONST(BACK);
+  MRB_ATTACH_CONST(FRONT_AND_BACK);
 
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_2D", mrb_fixnum_value(GL_TEXTURE_2D));
-  mrb_define_const(mrb, mod_gl2, "GL_CULL_FACE", mrb_fixnum_value(GL_CULL_FACE));
-  mrb_define_const(mrb, mod_gl2, "GL_BLEND", mrb_fixnum_value(GL_BLEND));
-  mrb_define_const(mrb, mod_gl2, "GL_DITHER", mrb_fixnum_value(GL_DITHER));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_TEST", mrb_fixnum_value(GL_STENCIL_TEST));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_TEST", mrb_fixnum_value(GL_DEPTH_TEST));
-  mrb_define_const(mrb, mod_gl2, "GL_SCISSOR_TEST", mrb_fixnum_value(GL_SCISSOR_TEST));
-  mrb_define_const(mrb, mod_gl2, "GL_POLYGON_OFFSET_FILL", mrb_fixnum_value(GL_POLYGON_OFFSET_FILL));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLE_ALPHA_TO_COVERAGE", mrb_fixnum_value(GL_SAMPLE_ALPHA_TO_COVERAGE));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLE_COVERAGE", mrb_fixnum_value(GL_SAMPLE_COVERAGE));
+  MRB_ATTACH_CONST(TEXTURE_2D);
+  MRB_ATTACH_CONST(CULL_FACE);
+  MRB_ATTACH_CONST(BLEND);
+  MRB_ATTACH_CONST(DITHER);
+  MRB_ATTACH_CONST(STENCIL_TEST);
+  MRB_ATTACH_CONST(DEPTH_TEST);
+  MRB_ATTACH_CONST(SCISSOR_TEST);
+  MRB_ATTACH_CONST(POLYGON_OFFSET_FILL);
+  MRB_ATTACH_CONST(SAMPLE_ALPHA_TO_COVERAGE);
+  MRB_ATTACH_CONST(SAMPLE_COVERAGE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NO_ERROR", mrb_fixnum_value(GL_NO_ERROR));
-  mrb_define_const(mrb, mod_gl2, "GL_INVALID_ENUM", mrb_fixnum_value(GL_INVALID_ENUM));
-  mrb_define_const(mrb, mod_gl2, "GL_INVALID_VALUE", mrb_fixnum_value(GL_INVALID_VALUE));
-  mrb_define_const(mrb, mod_gl2, "GL_INVALID_OPERATION", mrb_fixnum_value(GL_INVALID_OPERATION));
-  mrb_define_const(mrb, mod_gl2, "GL_OUT_OF_MEMORY", mrb_fixnum_value(GL_OUT_OF_MEMORY));
+  MRB_ATTACH_CONST(NO_ERROR);
+  MRB_ATTACH_CONST(INVALID_ENUM);
+  MRB_ATTACH_CONST(INVALID_VALUE);
+  MRB_ATTACH_CONST(INVALID_OPERATION);
+  MRB_ATTACH_CONST(OUT_OF_MEMORY);
 
-  mrb_define_const(mrb, mod_gl2, "GL_CW", mrb_fixnum_value(GL_CW));
-  mrb_define_const(mrb, mod_gl2, "GL_CCW", mrb_fixnum_value(GL_CCW));
+  MRB_ATTACH_CONST(CW);
+  MRB_ATTACH_CONST(CCW);
 
-  mrb_define_const(mrb, mod_gl2, "GL_LINE_WIDTH", mrb_fixnum_value(GL_LINE_WIDTH));
-  mrb_define_const(mrb, mod_gl2, "GL_ALIASED_POINT_SIZE_RANGE", mrb_fixnum_value(GL_ALIASED_POINT_SIZE_RANGE));
-  mrb_define_const(mrb, mod_gl2, "GL_ALIASED_LINE_WIDTH_RANGE", mrb_fixnum_value(GL_ALIASED_LINE_WIDTH_RANGE));
-  mrb_define_const(mrb, mod_gl2, "GL_CULL_FACE_MODE", mrb_fixnum_value(GL_CULL_FACE_MODE));
-  mrb_define_const(mrb, mod_gl2, "GL_FRONT_FACE", mrb_fixnum_value(GL_FRONT_FACE));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_RANGE", mrb_fixnum_value(GL_DEPTH_RANGE));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_WRITEMASK", mrb_fixnum_value(GL_DEPTH_WRITEMASK));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_CLEAR_VALUE", mrb_fixnum_value(GL_DEPTH_CLEAR_VALUE));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_FUNC", mrb_fixnum_value(GL_DEPTH_FUNC));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_CLEAR_VALUE", mrb_fixnum_value(GL_STENCIL_CLEAR_VALUE));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_FUNC", mrb_fixnum_value(GL_STENCIL_FUNC));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_FAIL", mrb_fixnum_value(GL_STENCIL_FAIL));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_PASS_DEPTH_FAIL", mrb_fixnum_value(GL_STENCIL_PASS_DEPTH_FAIL));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_PASS_DEPTH_PASS", mrb_fixnum_value(GL_STENCIL_PASS_DEPTH_PASS));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_REF", mrb_fixnum_value(GL_STENCIL_REF));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_VALUE_MASK", mrb_fixnum_value(GL_STENCIL_VALUE_MASK));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_WRITEMASK", mrb_fixnum_value(GL_STENCIL_WRITEMASK));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_FUNC", mrb_fixnum_value(GL_STENCIL_BACK_FUNC));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_FAIL", mrb_fixnum_value(GL_STENCIL_BACK_FAIL));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_PASS_DEPTH_FAIL", mrb_fixnum_value(GL_STENCIL_BACK_PASS_DEPTH_FAIL));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_PASS_DEPTH_PASS", mrb_fixnum_value(GL_STENCIL_BACK_PASS_DEPTH_PASS));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_REF", mrb_fixnum_value(GL_STENCIL_BACK_REF));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_VALUE_MASK", mrb_fixnum_value(GL_STENCIL_BACK_VALUE_MASK));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BACK_WRITEMASK", mrb_fixnum_value(GL_STENCIL_BACK_WRITEMASK));
-  mrb_define_const(mrb, mod_gl2, "GL_VIEWPORT", mrb_fixnum_value(GL_VIEWPORT));
-  mrb_define_const(mrb, mod_gl2, "GL_SCISSOR_BOX", mrb_fixnum_value(GL_SCISSOR_BOX));
+  MRB_ATTACH_CONST(LINE_WIDTH);
+  MRB_ATTACH_CONST(ALIASED_POINT_SIZE_RANGE);
+  MRB_ATTACH_CONST(ALIASED_LINE_WIDTH_RANGE);
+  MRB_ATTACH_CONST(CULL_FACE_MODE);
+  MRB_ATTACH_CONST(FRONT_FACE);
+  MRB_ATTACH_CONST(DEPTH_RANGE);
+  MRB_ATTACH_CONST(DEPTH_WRITEMASK);
+  MRB_ATTACH_CONST(DEPTH_CLEAR_VALUE);
+  MRB_ATTACH_CONST(DEPTH_FUNC);
+  MRB_ATTACH_CONST(STENCIL_CLEAR_VALUE);
+  MRB_ATTACH_CONST(STENCIL_FUNC);
+  MRB_ATTACH_CONST(STENCIL_FAIL);
+  MRB_ATTACH_CONST(STENCIL_PASS_DEPTH_FAIL);
+  MRB_ATTACH_CONST(STENCIL_PASS_DEPTH_PASS);
+  MRB_ATTACH_CONST(STENCIL_REF);
+  MRB_ATTACH_CONST(STENCIL_VALUE_MASK);
+  MRB_ATTACH_CONST(STENCIL_WRITEMASK);
+  MRB_ATTACH_CONST(STENCIL_BACK_FUNC);
+  MRB_ATTACH_CONST(STENCIL_BACK_FAIL);
+  MRB_ATTACH_CONST(STENCIL_BACK_PASS_DEPTH_FAIL);
+  MRB_ATTACH_CONST(STENCIL_BACK_PASS_DEPTH_PASS);
+  MRB_ATTACH_CONST(STENCIL_BACK_REF);
+  MRB_ATTACH_CONST(STENCIL_BACK_VALUE_MASK);
+  MRB_ATTACH_CONST(STENCIL_BACK_WRITEMASK);
+  MRB_ATTACH_CONST(VIEWPORT);
+  MRB_ATTACH_CONST(SCISSOR_BOX);
 
-  mrb_define_const(mrb, mod_gl2, "GL_COLOR_CLEAR_VALUE", mrb_fixnum_value(GL_COLOR_CLEAR_VALUE));
-  mrb_define_const(mrb, mod_gl2, "GL_COLOR_WRITEMASK", mrb_fixnum_value(GL_COLOR_WRITEMASK));
-  mrb_define_const(mrb, mod_gl2, "GL_UNPACK_ALIGNMENT", mrb_fixnum_value(GL_UNPACK_ALIGNMENT));
-  mrb_define_const(mrb, mod_gl2, "GL_PACK_ALIGNMENT", mrb_fixnum_value(GL_PACK_ALIGNMENT));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_TEXTURE_SIZE", mrb_fixnum_value(GL_MAX_TEXTURE_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_VIEWPORT_DIMS", mrb_fixnum_value(GL_MAX_VIEWPORT_DIMS));
-  mrb_define_const(mrb, mod_gl2, "GL_SUBPIXEL_BITS", mrb_fixnum_value(GL_SUBPIXEL_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_RED_BITS", mrb_fixnum_value(GL_RED_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_GREEN_BITS", mrb_fixnum_value(GL_GREEN_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_BLUE_BITS", mrb_fixnum_value(GL_BLUE_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_ALPHA_BITS", mrb_fixnum_value(GL_ALPHA_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_BITS", mrb_fixnum_value(GL_DEPTH_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_BITS", mrb_fixnum_value(GL_STENCIL_BITS));
-  mrb_define_const(mrb, mod_gl2, "GL_POLYGON_OFFSET_UNITS", mrb_fixnum_value(GL_POLYGON_OFFSET_UNITS));
+  MRB_ATTACH_CONST(COLOR_CLEAR_VALUE);
+  MRB_ATTACH_CONST(COLOR_WRITEMASK);
+  MRB_ATTACH_CONST(UNPACK_ALIGNMENT);
+  MRB_ATTACH_CONST(PACK_ALIGNMENT);
+  MRB_ATTACH_CONST(MAX_TEXTURE_SIZE);
+  MRB_ATTACH_CONST(MAX_VIEWPORT_DIMS);
+  MRB_ATTACH_CONST(SUBPIXEL_BITS);
+  MRB_ATTACH_CONST(RED_BITS);
+  MRB_ATTACH_CONST(GREEN_BITS);
+  MRB_ATTACH_CONST(BLUE_BITS);
+  MRB_ATTACH_CONST(ALPHA_BITS);
+  MRB_ATTACH_CONST(DEPTH_BITS);
+  MRB_ATTACH_CONST(STENCIL_BITS);
+  MRB_ATTACH_CONST(POLYGON_OFFSET_UNITS);
 
-  mrb_define_const(mrb, mod_gl2, "GL_POLYGON_OFFSET_FACTOR", mrb_fixnum_value(GL_POLYGON_OFFSET_FACTOR));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_BINDING_2D", mrb_fixnum_value(GL_TEXTURE_BINDING_2D));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLE_BUFFERS", mrb_fixnum_value(GL_SAMPLE_BUFFERS));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLES", mrb_fixnum_value(GL_SAMPLES));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLE_COVERAGE_VALUE", mrb_fixnum_value(GL_SAMPLE_COVERAGE_VALUE));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLE_COVERAGE_INVERT", mrb_fixnum_value(GL_SAMPLE_COVERAGE_INVERT));
+  MRB_ATTACH_CONST(POLYGON_OFFSET_FACTOR);
+  MRB_ATTACH_CONST(TEXTURE_BINDING_2D);
+  MRB_ATTACH_CONST(SAMPLE_BUFFERS);
+  MRB_ATTACH_CONST(SAMPLES);
+  MRB_ATTACH_CONST(SAMPLE_COVERAGE_VALUE);
+  MRB_ATTACH_CONST(SAMPLE_COVERAGE_INVERT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NUM_COMPRESSED_TEXTURE_FORMATS", mrb_fixnum_value(GL_NUM_COMPRESSED_TEXTURE_FORMATS));
-  mrb_define_const(mrb, mod_gl2, "GL_COMPRESSED_TEXTURE_FORMATS", mrb_fixnum_value(GL_COMPRESSED_TEXTURE_FORMATS));
+  MRB_ATTACH_CONST(NUM_COMPRESSED_TEXTURE_FORMATS);
+  MRB_ATTACH_CONST(COMPRESSED_TEXTURE_FORMATS);
 
-  mrb_define_const(mrb, mod_gl2, "GL_DONT_CARE", mrb_fixnum_value(GL_DONT_CARE));
-  mrb_define_const(mrb, mod_gl2, "GL_FASTEST", mrb_fixnum_value(GL_FASTEST));
-  mrb_define_const(mrb, mod_gl2, "GL_NICEST", mrb_fixnum_value(GL_NICEST));
+  MRB_ATTACH_CONST(DONT_CARE);
+  MRB_ATTACH_CONST(FASTEST);
+  MRB_ATTACH_CONST(NICEST);
 
-  mrb_define_const(mrb, mod_gl2, "GL_GENERATE_MIPMAP_HINT", mrb_fixnum_value(GL_GENERATE_MIPMAP_HINT));
+  MRB_ATTACH_CONST(GENERATE_MIPMAP_HINT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_BYTE", mrb_fixnum_value(GL_BYTE));
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_BYTE", mrb_fixnum_value(GL_UNSIGNED_BYTE));
-  mrb_define_const(mrb, mod_gl2, "GL_SHORT", mrb_fixnum_value(GL_SHORT));
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_SHORT", mrb_fixnum_value(GL_UNSIGNED_SHORT));
-  mrb_define_const(mrb, mod_gl2, "GL_INT", mrb_fixnum_value(GL_INT));
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_INT", mrb_fixnum_value(GL_UNSIGNED_INT));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT", mrb_fixnum_value(GL_FLOAT));
-  mrb_define_const(mrb, mod_gl2, "GL_FIXED", mrb_fixnum_value(GL_FIXED));
+  MRB_ATTACH_CONST(BYTE);
+  MRB_ATTACH_CONST(UNSIGNED_BYTE);
+  MRB_ATTACH_CONST(SHORT);
+  MRB_ATTACH_CONST(UNSIGNED_SHORT);
+  MRB_ATTACH_CONST(INT);
+  MRB_ATTACH_CONST(UNSIGNED_INT);
+  MRB_ATTACH_CONST(FLOAT);
+  MRB_ATTACH_CONST(FIXED);
 
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_COMPONENT", mrb_fixnum_value(GL_DEPTH_COMPONENT));
-  mrb_define_const(mrb, mod_gl2, "GL_ALPHA", mrb_fixnum_value(GL_ALPHA));
-  mrb_define_const(mrb, mod_gl2, "GL_RGB", mrb_fixnum_value(GL_RGB));
-  mrb_define_const(mrb, mod_gl2, "GL_RGBA", mrb_fixnum_value(GL_RGBA));
-  mrb_define_const(mrb, mod_gl2, "GL_LUMINANCE", mrb_fixnum_value(GL_LUMINANCE));
-  mrb_define_const(mrb, mod_gl2, "GL_LUMINANCE_ALPHA", mrb_fixnum_value(GL_LUMINANCE_ALPHA));
+  MRB_ATTACH_CONST(DEPTH_COMPONENT);
+  MRB_ATTACH_CONST(ALPHA);
+  MRB_ATTACH_CONST(RGB);
+  MRB_ATTACH_CONST(RGBA);
+  MRB_ATTACH_CONST(LUMINANCE);
+  MRB_ATTACH_CONST(LUMINANCE_ALPHA);
 
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_SHORT_4_4_4_4", mrb_fixnum_value(GL_UNSIGNED_SHORT_4_4_4_4));
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_SHORT_5_5_5_1", mrb_fixnum_value(GL_UNSIGNED_SHORT_5_5_5_1));
-  mrb_define_const(mrb, mod_gl2, "GL_UNSIGNED_SHORT_5_6_5", mrb_fixnum_value(GL_UNSIGNED_SHORT_5_6_5));
+  MRB_ATTACH_CONST(UNSIGNED_SHORT_4_4_4_4);
+  MRB_ATTACH_CONST(UNSIGNED_SHORT_5_5_5_1);
+  MRB_ATTACH_CONST(UNSIGNED_SHORT_5_6_5);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRAGMENT_SHADER", mrb_fixnum_value(GL_FRAGMENT_SHADER));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_SHADER", mrb_fixnum_value(GL_VERTEX_SHADER));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_VERTEX_ATTRIBS", mrb_fixnum_value(GL_MAX_VERTEX_ATTRIBS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_VERTEX_UNIFORM_VECTORS", mrb_fixnum_value(GL_MAX_VERTEX_UNIFORM_VECTORS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_VARYING_VECTORS", mrb_fixnum_value(GL_MAX_VARYING_VECTORS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS", mrb_fixnum_value(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS", mrb_fixnum_value(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_TEXTURE_IMAGE_UNITS", mrb_fixnum_value(GL_MAX_TEXTURE_IMAGE_UNITS));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_FRAGMENT_UNIFORM_VECTORS", mrb_fixnum_value(GL_MAX_FRAGMENT_UNIFORM_VECTORS));
-  mrb_define_const(mrb, mod_gl2, "GL_SHADER_TYPE", mrb_fixnum_value(GL_SHADER_TYPE));
-  mrb_define_const(mrb, mod_gl2, "GL_DELETE_STATUS", mrb_fixnum_value(GL_DELETE_STATUS));
-  mrb_define_const(mrb, mod_gl2, "GL_LINK_STATUS", mrb_fixnum_value(GL_LINK_STATUS));
-  mrb_define_const(mrb, mod_gl2, "GL_VALIDATE_STATUS", mrb_fixnum_value(GL_VALIDATE_STATUS));
-  mrb_define_const(mrb, mod_gl2, "GL_ATTACHED_SHADERS", mrb_fixnum_value(GL_ATTACHED_SHADERS));
-  mrb_define_const(mrb, mod_gl2, "GL_ACTIVE_UNIFORMS", mrb_fixnum_value(GL_ACTIVE_UNIFORMS));
-  mrb_define_const(mrb, mod_gl2, "GL_ACTIVE_UNIFORM_MAX_LENGTH", mrb_fixnum_value(GL_ACTIVE_UNIFORM_MAX_LENGTH));
-  mrb_define_const(mrb, mod_gl2, "GL_ACTIVE_ATTRIBUTES", mrb_fixnum_value(GL_ACTIVE_ATTRIBUTES));
-  mrb_define_const(mrb, mod_gl2, "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH", mrb_fixnum_value(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH));
-  mrb_define_const(mrb, mod_gl2, "GL_SHADING_LANGUAGE_VERSION", mrb_fixnum_value(GL_SHADING_LANGUAGE_VERSION));
-  mrb_define_const(mrb, mod_gl2, "GL_CURRENT_PROGRAM", mrb_fixnum_value(GL_CURRENT_PROGRAM));
+  MRB_ATTACH_CONST(FRAGMENT_SHADER);
+  MRB_ATTACH_CONST(VERTEX_SHADER);
+  MRB_ATTACH_CONST(MAX_VERTEX_ATTRIBS);
+  MRB_ATTACH_CONST(MAX_VERTEX_UNIFORM_VECTORS);
+  MRB_ATTACH_CONST(MAX_VARYING_VECTORS);
+  MRB_ATTACH_CONST(MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+  MRB_ATTACH_CONST(MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+  MRB_ATTACH_CONST(MAX_TEXTURE_IMAGE_UNITS);
+  MRB_ATTACH_CONST(MAX_FRAGMENT_UNIFORM_VECTORS);
+  MRB_ATTACH_CONST(SHADER_TYPE);
+  MRB_ATTACH_CONST(DELETE_STATUS);
+  MRB_ATTACH_CONST(LINK_STATUS);
+  MRB_ATTACH_CONST(VALIDATE_STATUS);
+  MRB_ATTACH_CONST(ATTACHED_SHADERS);
+  MRB_ATTACH_CONST(ACTIVE_UNIFORMS);
+  MRB_ATTACH_CONST(ACTIVE_UNIFORM_MAX_LENGTH);
+  MRB_ATTACH_CONST(ACTIVE_ATTRIBUTES);
+  MRB_ATTACH_CONST(ACTIVE_ATTRIBUTE_MAX_LENGTH);
+  MRB_ATTACH_CONST(SHADING_LANGUAGE_VERSION);
+  MRB_ATTACH_CONST(CURRENT_PROGRAM);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NEVER", mrb_fixnum_value(GL_NEVER));
-  mrb_define_const(mrb, mod_gl2, "GL_LESS", mrb_fixnum_value(GL_LESS));
-  mrb_define_const(mrb, mod_gl2, "GL_EQUAL", mrb_fixnum_value(GL_EQUAL));
-  mrb_define_const(mrb, mod_gl2, "GL_LEQUAL", mrb_fixnum_value(GL_LEQUAL));
-  mrb_define_const(mrb, mod_gl2, "GL_GREATER", mrb_fixnum_value(GL_GREATER));
-  mrb_define_const(mrb, mod_gl2, "GL_NOTEQUAL", mrb_fixnum_value(GL_NOTEQUAL));
-  mrb_define_const(mrb, mod_gl2, "GL_GEQUAL", mrb_fixnum_value(GL_GEQUAL));
-  mrb_define_const(mrb, mod_gl2, "GL_ALWAYS", mrb_fixnum_value(GL_ALWAYS));
+  MRB_ATTACH_CONST(NEVER);
+  MRB_ATTACH_CONST(LESS);
+  MRB_ATTACH_CONST(EQUAL);
+  MRB_ATTACH_CONST(LEQUAL);
+  MRB_ATTACH_CONST(GREATER);
+  MRB_ATTACH_CONST(NOTEQUAL);
+  MRB_ATTACH_CONST(GEQUAL);
+  MRB_ATTACH_CONST(ALWAYS);
 
-  mrb_define_const(mrb, mod_gl2, "GL_KEEP", mrb_fixnum_value(GL_KEEP));
-  mrb_define_const(mrb, mod_gl2, "GL_REPLACE", mrb_fixnum_value(GL_REPLACE));
-  mrb_define_const(mrb, mod_gl2, "GL_INCR", mrb_fixnum_value(GL_INCR));
-  mrb_define_const(mrb, mod_gl2, "GL_DECR", mrb_fixnum_value(GL_DECR));
-  mrb_define_const(mrb, mod_gl2, "GL_INVERT", mrb_fixnum_value(GL_INVERT));
-  mrb_define_const(mrb, mod_gl2, "GL_INCR_WRAP", mrb_fixnum_value(GL_INCR_WRAP));
-  mrb_define_const(mrb, mod_gl2, "GL_DECR_WRAP", mrb_fixnum_value(GL_DECR_WRAP));
+  MRB_ATTACH_CONST(KEEP);
+  MRB_ATTACH_CONST(REPLACE);
+  MRB_ATTACH_CONST(INCR);
+  MRB_ATTACH_CONST(DECR);
+  MRB_ATTACH_CONST(INVERT);
+  MRB_ATTACH_CONST(INCR_WRAP);
+  MRB_ATTACH_CONST(DECR_WRAP);
 
-  mrb_define_const(mrb, mod_gl2, "GL_VENDOR", mrb_fixnum_value(GL_VENDOR));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERER", mrb_fixnum_value(GL_RENDERER));
-  mrb_define_const(mrb, mod_gl2, "GL_VERSION", mrb_fixnum_value(GL_VERSION));
-  mrb_define_const(mrb, mod_gl2, "GL_EXTENSIONS", mrb_fixnum_value(GL_EXTENSIONS));
+  MRB_ATTACH_CONST(VENDOR);
+  MRB_ATTACH_CONST(RENDERER);
+  MRB_ATTACH_CONST(VERSION);
+  MRB_ATTACH_CONST(EXTENSIONS);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NEAREST", mrb_fixnum_value(GL_NEAREST));
-  mrb_define_const(mrb, mod_gl2, "GL_LINEAR", mrb_fixnum_value(GL_LINEAR));
+  MRB_ATTACH_CONST(NEAREST);
+  MRB_ATTACH_CONST(LINEAR);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NEAREST_MIPMAP_NEAREST", mrb_fixnum_value(GL_NEAREST_MIPMAP_NEAREST));
-  mrb_define_const(mrb, mod_gl2, "GL_LINEAR_MIPMAP_NEAREST", mrb_fixnum_value(GL_LINEAR_MIPMAP_NEAREST));
-  mrb_define_const(mrb, mod_gl2, "GL_NEAREST_MIPMAP_LINEAR", mrb_fixnum_value(GL_NEAREST_MIPMAP_LINEAR));
-  mrb_define_const(mrb, mod_gl2, "GL_LINEAR_MIPMAP_LINEAR", mrb_fixnum_value(GL_LINEAR_MIPMAP_LINEAR));
+  MRB_ATTACH_CONST(NEAREST_MIPMAP_NEAREST);
+  MRB_ATTACH_CONST(LINEAR_MIPMAP_NEAREST);
+  MRB_ATTACH_CONST(NEAREST_MIPMAP_LINEAR);
+  MRB_ATTACH_CONST(LINEAR_MIPMAP_LINEAR);
 
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_MAG_FILTER", mrb_fixnum_value(GL_TEXTURE_MAG_FILTER));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_MIN_FILTER", mrb_fixnum_value(GL_TEXTURE_MIN_FILTER));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_WRAP_S", mrb_fixnum_value(GL_TEXTURE_WRAP_S));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_WRAP_T", mrb_fixnum_value(GL_TEXTURE_WRAP_T));
+  MRB_ATTACH_CONST(TEXTURE_MAG_FILTER);
+  MRB_ATTACH_CONST(TEXTURE_MIN_FILTER);
+  MRB_ATTACH_CONST(TEXTURE_WRAP_S);
+  MRB_ATTACH_CONST(TEXTURE_WRAP_T);
 
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE", mrb_fixnum_value(GL_TEXTURE));
+  MRB_ATTACH_CONST(TEXTURE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_BINDING_CUBE_MAP", mrb_fixnum_value(GL_TEXTURE_BINDING_CUBE_MAP));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_POSITIVE_X", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_POSITIVE_X));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_NEGATIVE_X", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_NEGATIVE_X));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_POSITIVE_Y", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_POSITIVE_Y));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_NEGATIVE_Y", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_POSITIVE_Z", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_POSITIVE_Z));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z", mrb_fixnum_value(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_CUBE_MAP_TEXTURE_SIZE", mrb_fixnum_value(GL_MAX_CUBE_MAP_TEXTURE_SIZE));
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP);
+  MRB_ATTACH_CONST(TEXTURE_BINDING_CUBE_MAP);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_POSITIVE_X);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_NEGATIVE_X);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_POSITIVE_Y);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_NEGATIVE_Y);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_POSITIVE_Z);
+  MRB_ATTACH_CONST(TEXTURE_CUBE_MAP_NEGATIVE_Z);
+  MRB_ATTACH_CONST(MAX_CUBE_MAP_TEXTURE_SIZE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE0", mrb_fixnum_value(GL_TEXTURE0));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE1", mrb_fixnum_value(GL_TEXTURE1));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE2", mrb_fixnum_value(GL_TEXTURE2));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE3", mrb_fixnum_value(GL_TEXTURE3));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE4", mrb_fixnum_value(GL_TEXTURE4));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE5", mrb_fixnum_value(GL_TEXTURE5));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE6", mrb_fixnum_value(GL_TEXTURE6));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE7", mrb_fixnum_value(GL_TEXTURE7));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE8", mrb_fixnum_value(GL_TEXTURE8));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE9", mrb_fixnum_value(GL_TEXTURE9));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE10", mrb_fixnum_value(GL_TEXTURE10));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE11", mrb_fixnum_value(GL_TEXTURE11));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE12", mrb_fixnum_value(GL_TEXTURE12));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE13", mrb_fixnum_value(GL_TEXTURE13));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE14", mrb_fixnum_value(GL_TEXTURE14));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE15", mrb_fixnum_value(GL_TEXTURE15));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE16", mrb_fixnum_value(GL_TEXTURE16));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE17", mrb_fixnum_value(GL_TEXTURE17));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE18", mrb_fixnum_value(GL_TEXTURE18));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE19", mrb_fixnum_value(GL_TEXTURE19));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE20", mrb_fixnum_value(GL_TEXTURE20));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE21", mrb_fixnum_value(GL_TEXTURE21));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE22", mrb_fixnum_value(GL_TEXTURE22));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE23", mrb_fixnum_value(GL_TEXTURE23));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE24", mrb_fixnum_value(GL_TEXTURE24));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE25", mrb_fixnum_value(GL_TEXTURE25));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE26", mrb_fixnum_value(GL_TEXTURE26));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE27", mrb_fixnum_value(GL_TEXTURE27));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE28", mrb_fixnum_value(GL_TEXTURE28));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE29", mrb_fixnum_value(GL_TEXTURE29));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE30", mrb_fixnum_value(GL_TEXTURE30));
-  mrb_define_const(mrb, mod_gl2, "GL_TEXTURE31", mrb_fixnum_value(GL_TEXTURE31));
-  mrb_define_const(mrb, mod_gl2, "GL_ACTIVE_TEXTURE", mrb_fixnum_value(GL_ACTIVE_TEXTURE));
+  MRB_ATTACH_CONST(TEXTURE0);
+  MRB_ATTACH_CONST(TEXTURE1);
+  MRB_ATTACH_CONST(TEXTURE2);
+  MRB_ATTACH_CONST(TEXTURE3);
+  MRB_ATTACH_CONST(TEXTURE4);
+  MRB_ATTACH_CONST(TEXTURE5);
+  MRB_ATTACH_CONST(TEXTURE6);
+  MRB_ATTACH_CONST(TEXTURE7);
+  MRB_ATTACH_CONST(TEXTURE8);
+  MRB_ATTACH_CONST(TEXTURE9);
+  MRB_ATTACH_CONST(TEXTURE10);
+  MRB_ATTACH_CONST(TEXTURE11);
+  MRB_ATTACH_CONST(TEXTURE12);
+  MRB_ATTACH_CONST(TEXTURE13);
+  MRB_ATTACH_CONST(TEXTURE14);
+  MRB_ATTACH_CONST(TEXTURE15);
+  MRB_ATTACH_CONST(TEXTURE16);
+  MRB_ATTACH_CONST(TEXTURE17);
+  MRB_ATTACH_CONST(TEXTURE18);
+  MRB_ATTACH_CONST(TEXTURE19);
+  MRB_ATTACH_CONST(TEXTURE20);
+  MRB_ATTACH_CONST(TEXTURE21);
+  MRB_ATTACH_CONST(TEXTURE22);
+  MRB_ATTACH_CONST(TEXTURE23);
+  MRB_ATTACH_CONST(TEXTURE24);
+  MRB_ATTACH_CONST(TEXTURE25);
+  MRB_ATTACH_CONST(TEXTURE26);
+  MRB_ATTACH_CONST(TEXTURE27);
+  MRB_ATTACH_CONST(TEXTURE28);
+  MRB_ATTACH_CONST(TEXTURE29);
+  MRB_ATTACH_CONST(TEXTURE30);
+  MRB_ATTACH_CONST(TEXTURE31);
+  MRB_ATTACH_CONST(ACTIVE_TEXTURE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_REPEAT", mrb_fixnum_value(GL_REPEAT));
-  mrb_define_const(mrb, mod_gl2, "GL_CLAMP_TO_EDGE", mrb_fixnum_value(GL_CLAMP_TO_EDGE));
-  mrb_define_const(mrb, mod_gl2, "GL_MIRRORED_REPEAT", mrb_fixnum_value(GL_MIRRORED_REPEAT));
+  MRB_ATTACH_CONST(REPEAT);
+  MRB_ATTACH_CONST(CLAMP_TO_EDGE);
+  MRB_ATTACH_CONST(MIRRORED_REPEAT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_VEC2", mrb_fixnum_value(GL_FLOAT_VEC2));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_VEC3", mrb_fixnum_value(GL_FLOAT_VEC3));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_VEC4", mrb_fixnum_value(GL_FLOAT_VEC4));
-  mrb_define_const(mrb, mod_gl2, "GL_INT_VEC2", mrb_fixnum_value(GL_INT_VEC2));
-  mrb_define_const(mrb, mod_gl2, "GL_INT_VEC3", mrb_fixnum_value(GL_INT_VEC3));
-  mrb_define_const(mrb, mod_gl2, "GL_INT_VEC4", mrb_fixnum_value(GL_INT_VEC4));
-  mrb_define_const(mrb, mod_gl2, "GL_BOOL", mrb_fixnum_value(GL_BOOL));
-  mrb_define_const(mrb, mod_gl2, "GL_BOOL_VEC2", mrb_fixnum_value(GL_BOOL_VEC2));
-  mrb_define_const(mrb, mod_gl2, "GL_BOOL_VEC3", mrb_fixnum_value(GL_BOOL_VEC3));
-  mrb_define_const(mrb, mod_gl2, "GL_BOOL_VEC4", mrb_fixnum_value(GL_BOOL_VEC4));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_MAT2", mrb_fixnum_value(GL_FLOAT_MAT2));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_MAT3", mrb_fixnum_value(GL_FLOAT_MAT3));
-  mrb_define_const(mrb, mod_gl2, "GL_FLOAT_MAT4", mrb_fixnum_value(GL_FLOAT_MAT4));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLER_2D", mrb_fixnum_value(GL_SAMPLER_2D));
-  mrb_define_const(mrb, mod_gl2, "GL_SAMPLER_CUBE", mrb_fixnum_value(GL_SAMPLER_CUBE));
+  MRB_ATTACH_CONST(FLOAT_VEC2);
+  MRB_ATTACH_CONST(FLOAT_VEC3);
+  MRB_ATTACH_CONST(FLOAT_VEC4);
+  MRB_ATTACH_CONST(INT_VEC2);
+  MRB_ATTACH_CONST(INT_VEC3);
+  MRB_ATTACH_CONST(INT_VEC4);
+  MRB_ATTACH_CONST(BOOL);
+  MRB_ATTACH_CONST(BOOL_VEC2);
+  MRB_ATTACH_CONST(BOOL_VEC3);
+  MRB_ATTACH_CONST(BOOL_VEC4);
+  MRB_ATTACH_CONST(FLOAT_MAT2);
+  MRB_ATTACH_CONST(FLOAT_MAT3);
+  MRB_ATTACH_CONST(FLOAT_MAT4);
+  MRB_ATTACH_CONST(SAMPLER_2D);
+  MRB_ATTACH_CONST(SAMPLER_CUBE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_ENABLED", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_ENABLED));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_SIZE", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_STRIDE", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_STRIDE));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_TYPE", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_TYPE));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_NORMALIZED", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_POINTER", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_POINTER));
-  mrb_define_const(mrb, mod_gl2, "GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING", mrb_fixnum_value(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING));
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_ENABLED);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_SIZE);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_STRIDE);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_TYPE);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_NORMALIZED);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_POINTER);
+  MRB_ATTACH_CONST(VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
 
-  mrb_define_const(mrb, mod_gl2, "GL_IMPLEMENTATION_COLOR_READ_TYPE", mrb_fixnum_value(GL_IMPLEMENTATION_COLOR_READ_TYPE));
-  mrb_define_const(mrb, mod_gl2, "GL_IMPLEMENTATION_COLOR_READ_FORMAT", mrb_fixnum_value(GL_IMPLEMENTATION_COLOR_READ_FORMAT));
+  MRB_ATTACH_CONST(IMPLEMENTATION_COLOR_READ_TYPE);
+  MRB_ATTACH_CONST(IMPLEMENTATION_COLOR_READ_FORMAT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_COMPILE_STATUS", mrb_fixnum_value(GL_COMPILE_STATUS));
-  mrb_define_const(mrb, mod_gl2, "GL_INFO_LOG_LENGTH", mrb_fixnum_value(GL_INFO_LOG_LENGTH));
-  mrb_define_const(mrb, mod_gl2, "GL_SHADER_SOURCE_LENGTH", mrb_fixnum_value(GL_SHADER_SOURCE_LENGTH));
-  mrb_define_const(mrb, mod_gl2, "GL_SHADER_COMPILER", mrb_fixnum_value(GL_SHADER_COMPILER));
+  MRB_ATTACH_CONST(COMPILE_STATUS);
+  MRB_ATTACH_CONST(INFO_LOG_LENGTH);
+  MRB_ATTACH_CONST(SHADER_SOURCE_LENGTH);
+  MRB_ATTACH_CONST(SHADER_COMPILER);
 
-  mrb_define_const(mrb, mod_gl2, "GL_SHADER_BINARY_FORMATS", mrb_fixnum_value(GL_SHADER_BINARY_FORMATS));
-  mrb_define_const(mrb, mod_gl2, "GL_NUM_SHADER_BINARY_FORMATS", mrb_fixnum_value(GL_NUM_SHADER_BINARY_FORMATS));
+  MRB_ATTACH_CONST(SHADER_BINARY_FORMATS);
+  MRB_ATTACH_CONST(NUM_SHADER_BINARY_FORMATS);
 
-  mrb_define_const(mrb, mod_gl2, "GL_LOW_FLOAT", mrb_fixnum_value(GL_LOW_FLOAT));
-  mrb_define_const(mrb, mod_gl2, "GL_MEDIUM_FLOAT", mrb_fixnum_value(GL_MEDIUM_FLOAT));
-  mrb_define_const(mrb, mod_gl2, "GL_HIGH_FLOAT", mrb_fixnum_value(GL_HIGH_FLOAT));
-  mrb_define_const(mrb, mod_gl2, "GL_LOW_INT", mrb_fixnum_value(GL_LOW_INT));
-  mrb_define_const(mrb, mod_gl2, "GL_MEDIUM_INT", mrb_fixnum_value(GL_MEDIUM_INT));
-  mrb_define_const(mrb, mod_gl2, "GL_HIGH_INT", mrb_fixnum_value(GL_HIGH_INT));
+  MRB_ATTACH_CONST(LOW_FLOAT);
+  MRB_ATTACH_CONST(MEDIUM_FLOAT);
+  MRB_ATTACH_CONST(HIGH_FLOAT);
+  MRB_ATTACH_CONST(LOW_INT);
+  MRB_ATTACH_CONST(MEDIUM_INT);
+  MRB_ATTACH_CONST(HIGH_INT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER", mrb_fixnum_value(GL_FRAMEBUFFER));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER", mrb_fixnum_value(GL_RENDERBUFFER));
+  MRB_ATTACH_CONST(FRAMEBUFFER);
+  MRB_ATTACH_CONST(RENDERBUFFER);
 
-  mrb_define_const(mrb, mod_gl2, "GL_RGBA4", mrb_fixnum_value(GL_RGBA4));
-  mrb_define_const(mrb, mod_gl2, "GL_RGB5_A1", mrb_fixnum_value(GL_RGB5_A1));
-  mrb_define_const(mrb, mod_gl2, "GL_RGB565", mrb_fixnum_value(GL_RGB565));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_COMPONENT16", mrb_fixnum_value(GL_DEPTH_COMPONENT16));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX", mrb_fixnum_value(GL_STENCIL_INDEX));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX8", mrb_fixnum_value(GL_STENCIL_INDEX8));
+  MRB_ATTACH_CONST(RGBA4);
+  MRB_ATTACH_CONST(RGB5_A1);
+  MRB_ATTACH_CONST(RGB565);
+  MRB_ATTACH_CONST(DEPTH_COMPONENT16);
+  MRB_ATTACH_CONST(STENCIL_INDEX);
+  MRB_ATTACH_CONST(STENCIL_INDEX8);
 
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_WIDTH", mrb_fixnum_value(GL_RENDERBUFFER_WIDTH));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_HEIGHT", mrb_fixnum_value(GL_RENDERBUFFER_HEIGHT));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_INTERNAL_FORMAT", mrb_fixnum_value(GL_RENDERBUFFER_INTERNAL_FORMAT));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_RED_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_RED_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_GREEN_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_GREEN_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_BLUE_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_BLUE_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_ALPHA_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_ALPHA_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_DEPTH_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_DEPTH_SIZE));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_STENCIL_SIZE", mrb_fixnum_value(GL_RENDERBUFFER_STENCIL_SIZE));
+  MRB_ATTACH_CONST(RENDERBUFFER_WIDTH);
+  MRB_ATTACH_CONST(RENDERBUFFER_HEIGHT);
+  MRB_ATTACH_CONST(RENDERBUFFER_INTERNAL_FORMAT);
+  MRB_ATTACH_CONST(RENDERBUFFER_RED_SIZE);
+  MRB_ATTACH_CONST(RENDERBUFFER_GREEN_SIZE);
+  MRB_ATTACH_CONST(RENDERBUFFER_BLUE_SIZE);
+  MRB_ATTACH_CONST(RENDERBUFFER_ALPHA_SIZE);
+  MRB_ATTACH_CONST(RENDERBUFFER_DEPTH_SIZE);
+  MRB_ATTACH_CONST(RENDERBUFFER_STENCIL_SIZE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE", mrb_fixnum_value(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME", mrb_fixnum_value(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL", mrb_fixnum_value(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE", mrb_fixnum_value(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE));
+  MRB_ATTACH_CONST(FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE);
+  MRB_ATTACH_CONST(FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+  MRB_ATTACH_CONST(FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL);
+  MRB_ATTACH_CONST(FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_COLOR_ATTACHMENT0", mrb_fixnum_value(GL_COLOR_ATTACHMENT0));
-  mrb_define_const(mrb, mod_gl2, "GL_DEPTH_ATTACHMENT", mrb_fixnum_value(GL_DEPTH_ATTACHMENT));
-  mrb_define_const(mrb, mod_gl2, "GL_STENCIL_ATTACHMENT", mrb_fixnum_value(GL_STENCIL_ATTACHMENT));
+  MRB_ATTACH_CONST(COLOR_ATTACHMENT0);
+  MRB_ATTACH_CONST(DEPTH_ATTACHMENT);
+  MRB_ATTACH_CONST(STENCIL_ATTACHMENT);
 
-  mrb_define_const(mrb, mod_gl2, "GL_NONE", mrb_fixnum_value(GL_NONE));
+  MRB_ATTACH_CONST(NONE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_COMPLETE", mrb_fixnum_value(GL_FRAMEBUFFER_COMPLETE));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT", mrb_fixnum_value(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT", mrb_fixnum_value(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS", mrb_fixnum_value(GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS));
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_UNSUPPORTED", mrb_fixnum_value(GL_FRAMEBUFFER_UNSUPPORTED));
+  MRB_ATTACH_CONST(FRAMEBUFFER_COMPLETE);
+  MRB_ATTACH_CONST(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+  MRB_ATTACH_CONST(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+  MRB_ATTACH_CONST(FRAMEBUFFER_INCOMPLETE_DIMENSIONS);
+  MRB_ATTACH_CONST(FRAMEBUFFER_UNSUPPORTED);
 
-  mrb_define_const(mrb, mod_gl2, "GL_FRAMEBUFFER_BINDING", mrb_fixnum_value(GL_FRAMEBUFFER_BINDING));
-  mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_BINDING", mrb_fixnum_value(GL_RENDERBUFFER_BINDING));
-  mrb_define_const(mrb, mod_gl2, "GL_MAX_RENDERBUFFER_SIZE", mrb_fixnum_value(GL_MAX_RENDERBUFFER_SIZE));
+  MRB_ATTACH_CONST(FRAMEBUFFER_BINDING);
+  MRB_ATTACH_CONST(RENDERBUFFER_BINDING);
+  MRB_ATTACH_CONST(MAX_RENDERBUFFER_SIZE);
 
-  mrb_define_const(mrb, mod_gl2, "GL_INVALID_FRAMEBUFFER_OPERATION", mrb_fixnum_value(GL_INVALID_FRAMEBUFFER_OPERATION));
+  MRB_ATTACH_CONST(INVALID_FRAMEBUFFER_OPERATION);
 
   /* GL core functions */
+  MRB_ATTACH_FUNC(ActiveTexture, 1);
+  MRB_ATTACH_FUNC(AttachShader, 2);
+  MRB_ATTACH_FUNC(BindAttribLocation, 3);
+  MRB_ATTACH_FUNC(BindBuffer, 2);
+  MRB_ATTACH_FUNC(BindFramebuffer, 2);
+  MRB_ATTACH_FUNC(BindRenderbuffer, 2);
+  MRB_ATTACH_FUNC(BindTexture, 2);
+  MRB_ATTACH_FUNC(BlendColor, 4);
+  MRB_ATTACH_FUNC(BlendEquation, 1);
+  MRB_ATTACH_FUNC(BlendEquationSeparate, 2);
+  MRB_ATTACH_FUNC(BlendFunc, 2);
+  MRB_ATTACH_FUNC(BlendFuncSeparate, 4);
+  MRB_ATTACH_FUNC(BufferData, 4);
+  MRB_ATTACH_FUNC(BufferSubData, 4);
+  MRB_ATTACH_FUNC(CheckFramebufferStatus, 1);
+  MRB_ATTACH_FUNC(Clear, 1);
+  MRB_ATTACH_FUNC(ClearColor, 4);
+  MRB_ATTACH_FUNC(ClearDepthf, 1);
+  MRB_ATTACH_FUNC(ClearStencil, 1);
+  MRB_ATTACH_FUNC(ColorMask, 4);
 }

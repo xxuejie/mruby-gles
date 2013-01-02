@@ -21,7 +21,6 @@
 #define MRB_SPEC_GLboolean "o"
 #define MRB_SPEC_GLsizei "i"
 #define MRB_SPEC_GLuint_arr "A"
-#define MRB_SPEC_GLuint_arr_ret "A"
 #define MRB_SPEC_GLfloat "f"
 
 /* mrb type definition */
@@ -37,7 +36,6 @@
 #define MRB_TYPE_GLboolean(x_) mrb_value x_
 #define MRB_TYPE_GLsizei(x_) mrb_int x_
 #define MRB_TYPE_GLuint_arr(x_) mrb_value x_; GLuint* x_##_ptr = NULL
-#define MRB_TYPE_GLuint_arr_ret(x_) mrb_value x_; GLuint* x_##_ptr = NULL
 #define MRB_TYPE_GLfloat(x_) mrb_float x_
 
 /* GL type definition */
@@ -59,7 +57,6 @@
 #define GLboolean_v(x_) (mrb_test(x_) ? (GL_TRUE) : (GL_FALSE))
 #define GLsizei_v(x_) (GLsizei) x_
 #define GLuint_arr_v(x_) convert_to_GLuint(mrb, x_, &x_##_ptr)
-#define GLuint_arr_ret_v(x_) convert_to_GLuint(mrb, x_, &x_##_ptr)
 #define GLfloat_v(x_) (GLfloat) x_
 
 /* convert OpenGL return types to mrb_value */
@@ -81,14 +78,6 @@
       (*p)[i] = MV_TO_##t_(RARRAY_PTR(mrb_val)[i]); \
     } \
     return *p; \
-  } \
-  static \
-  void convert_back_##t_(mrb_state* mrb, mrb_value mrb_val, t_* p) { \
-    int len = RARRAY_LEN(mrb_val), i; \
-    for (i = 0; i < len; i++) { \
-      RARRAY_PTR(mrb_val)[i] = RET_CONVERT_##t_(p[i]); \
-    } \
-    free(p); \
   }
 
 /* release memory allocated by mrb types(if needed) */
@@ -104,7 +93,6 @@
 #define MRB_RELEASE_GLboolean(x_)
 #define MRB_RELEASE_GLsizei(x_)
 #define MRB_RELEASE_GLuint_arr(x_) free(x_##_ptr)
-#define MRB_RELEASE_GLuint_arr_ret(x_) convert_back_GLuint(mrb, x_, x_##_ptr)
 #define MRB_RELEASE_GLfloat(x_)
 
 #define ARG_DEF_SINGLE(t_, n_) \

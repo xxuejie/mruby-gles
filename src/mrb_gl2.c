@@ -66,13 +66,8 @@ FUNC_ARG_0(Flush);
 FUNC_ARG_4(FramebufferRenderbuffer, GLenum, GLenum, GLenum, GLuint);
 FUNC_ARG_5(FramebufferTexture2D, GLenum, GLenum, GLenum, GLuint, GLint);
 FUNC_ARG_1(FrontFace, GLenum);
-FUNC_ARG_2(GenBuffers, GLsizei, GLuint_arr_ret);
 FUNC_ARG_1(GenerateMipmap, GLenum);
-FUNC_ARG_2(GenFramebuffers, GLsizei, GLuint_arr_ret);
-FUNC_ARG_2(GenRenderbuffers, GLsizei, GLuint_arr_ret);
-FUNC_ARG_2(GenTextures, GLsizei, GLuint_arr_ret);
 
-/* TODO: revisit all the glGet* functions, see we can refactor them another way. */
 GET_ACTIVE_FUNC(Attrib);
 GET_ACTIVE_FUNC(Uniform);
 
@@ -502,11 +497,15 @@ mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
   MRB_ATTACH_FUNC(FramebufferRenderbuffer, 4);
   MRB_ATTACH_FUNC(FramebufferTexture2D, 5);
   MRB_ATTACH_FUNC(FrontFace, 1);
-  MRB_ATTACH_FUNC(GenBuffers, 2);
+
+  /* MRB_ATTACH_FUNC(GenBuffers, 2); */
+
   MRB_ATTACH_FUNC(GenerateMipmap, 1);
-  MRB_ATTACH_FUNC(GenFramebuffers, 2);
-  MRB_ATTACH_FUNC(GenRenderbuffers, 2);
-  MRB_ATTACH_FUNC(GenTextures, 2);
+
+  /* MRB_ATTACH_FUNC(GenFramebuffers, 2); */
+  /* MRB_ATTACH_FUNC(GenRenderbuffers, 2); */
+  /* MRB_ATTACH_FUNC(GenTextures, 2); */
+
   MRB_ATTACH_FUNC(GetActiveAttrib, 7);
   MRB_ATTACH_FUNC(GetActiveUniform, 7);
 

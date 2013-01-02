@@ -7,12 +7,15 @@
  * native data used by OpenGL ES.
  */
 #include <mruby.h>
+#include <mruby/array.h>
 
 #include <GLES2/gl2.h>
 
 #include "mrb_gl_defs.h"
 
 static struct RClass *mod_gl2;
+
+DEF_CONVERT_UTILS(GLuint);
 
 FUNC_ARG_1(ActiveTexture, GLenum);
 FUNC_ARG_2(AttachShader, GLuint, GLuint);
@@ -34,6 +37,59 @@ FUNC_ARG_4(ClearColor, GLclampf, GLclampf, GLclampf, GLclampf);
 FUNC_ARG_1(ClearDepthf, GLclampf);
 FUNC_ARG_1(ClearStencil, GLint);
 FUNC_ARG_4(ColorMask, GLboolean, GLboolean, GLboolean, GLboolean);
+FUNC_ARG_1(CompileShader, GLuint);
+FUNC_ARG_8(CompressedTexImage2D, GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, GLvoid_p);
+FUNC_ARG_9(CompressedTexSubImage2D, GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, GLvoid_p);
+FUNC_ARG_8(CopyTexImage2D, GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint);
+FUNC_ARG_8(CopyTexSubImage2D, GLenum, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei);
+FUNC_RET_ARG_0(CreateProgram, GLuint);
+FUNC_RET_ARG_1(CreateShader, GLuint, GLenum);
+FUNC_ARG_1(CullFace, GLenum);
+FUNC_ARG_2(DeleteBuffers, GLsizei, GLuint_arr);
+FUNC_ARG_2(DeleteFramebuffers, GLsizei, GLuint_arr);
+FUNC_ARG_1(DeleteProgram, GLuint);
+FUNC_ARG_2(DeleteRenderbuffers, GLsizei, GLuint_arr);
+FUNC_ARG_1(DeleteShader, GLuint);
+FUNC_ARG_2(DeleteTextures, GLsizei, GLuint_arr);
+FUNC_ARG_1(DepthFunc, GLenum);
+FUNC_ARG_1(DepthMask, GLboolean);
+FUNC_ARG_2(DepthRangef, GLclampf, GLclampf);
+FUNC_ARG_2(DetachShader, GLuint, GLuint);
+FUNC_ARG_1(Disable, GLenum);
+FUNC_ARG_1(DisableVertexAttribArray, GLuint);
+FUNC_ARG_3(DrawArrays, GLenum, GLint, GLsizei);
+FUNC_ARG_4(DrawElements, GLenum, GLsizei, GLenum, GLvoid_p);
+FUNC_ARG_1(Enable, GLenum);
+FUNC_ARG_1(EnableVertexAttribArray, GLuint);
+FUNC_ARG_0(Finish);
+FUNC_ARG_0(Flush);
+FUNC_ARG_4(FramebufferRenderbuffer, GLenum, GLenum, GLenum, GLuint);
+FUNC_ARG_5(FramebufferTexture2D, GLenum, GLenum, GLenum, GLuint, GLint);
+FUNC_ARG_1(FrontFace, GLenum);
+FUNC_ARG_2(GenBuffers, GLsizei, GLuint_arr_ret);
+FUNC_ARG_1(GenerateMipmap, GLenum);
+FUNC_ARG_2(GenFramebuffers, GLsizei, GLuint_arr_ret);
+FUNC_ARG_2(GenRenderbuffers, GLsizei, GLuint_arr_ret);
+FUNC_ARG_2(GenTextures, GLsizei, GLuint_arr_ret);
+
+/* TODO: revisit all the glGet* functions, see we can refactor them another way. */
+GET_ACTIVE_FUNC(Attrib);
+GET_ACTIVE_FUNC(Uniform);
+
+FUNC_ARG_2(Hint, GLenum, GLenum);
+FUNC_RET_ARG_1(IsBuffer, GLboolean, GLuint);
+FUNC_RET_ARG_1(IsEnabled, GLboolean, GLenum);
+FUNC_RET_ARG_1(IsFramebuffer, GLboolean, GLuint);
+FUNC_RET_ARG_1(IsProgram, GLboolean, GLuint);
+FUNC_RET_ARG_1(IsRenderbuffer, GLboolean, GLuint);
+FUNC_RET_ARG_1(IsShader, GLboolean, GLuint);
+FUNC_RET_ARG_1(IsTexture, GLboolean, GLuint);
+FUNC_ARG_1(LineWidth, GLfloat);
+FUNC_ARG_1(LinkProgram, GLuint);
+FUNC_ARG_2(PixelStorei, GLenum, GLint);
+FUNC_ARG_2(PolygonOffset, GLfloat, GLfloat);
+FUNC_ARG_0(ReleaseShaderCompiler);
+FUNC_ARG_4(RenderbufferStorage, GLenum, GLenum, GLsizei, GLsizei);
 
 void
 mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
@@ -417,4 +473,132 @@ mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
   MRB_ATTACH_FUNC(ClearDepthf, 1);
   MRB_ATTACH_FUNC(ClearStencil, 1);
   MRB_ATTACH_FUNC(ColorMask, 4);
+  MRB_ATTACH_FUNC(CompileShader, 1);
+  MRB_ATTACH_FUNC(CompressedTexImage2D, 8);
+  MRB_ATTACH_FUNC(CompressedTexSubImage2D, 9);
+  MRB_ATTACH_FUNC(CopyTexImage2D, 8);
+  MRB_ATTACH_FUNC(CopyTexSubImage2D, 8);
+  MRB_ATTACH_FUNC(CreateProgram, 1);
+  MRB_ATTACH_FUNC(CreateShader, 1);
+  MRB_ATTACH_FUNC(CullFace, 1);
+  MRB_ATTACH_FUNC(DeleteBuffers, 2);
+  MRB_ATTACH_FUNC(DeleteFramebuffers, 2);
+  MRB_ATTACH_FUNC(DeleteProgram, 1);
+  MRB_ATTACH_FUNC(DeleteRenderbuffers, 2);
+  MRB_ATTACH_FUNC(DeleteShader, 1);
+  MRB_ATTACH_FUNC(DeleteTextures, 2);
+  MRB_ATTACH_FUNC(DepthFunc, 1);
+  MRB_ATTACH_FUNC(DepthMask, 1);
+  MRB_ATTACH_FUNC(DepthRangef, 2);
+  MRB_ATTACH_FUNC(DetachShader, 2);
+  MRB_ATTACH_FUNC(Disable, 1);
+  MRB_ATTACH_FUNC(DisableVertexAttribArray, 1);
+  MRB_ATTACH_FUNC(DrawArrays, 3);
+  MRB_ATTACH_FUNC(DrawElements, 4);
+  MRB_ATTACH_FUNC(Enable, 1);
+  MRB_ATTACH_FUNC(EnableVertexAttribArray, 1);
+  MRB_ATTACH_FUNC(Finish, 1);
+  MRB_ATTACH_FUNC(Flush, 1);
+  MRB_ATTACH_FUNC(FramebufferRenderbuffer, 4);
+  MRB_ATTACH_FUNC(FramebufferTexture2D, 5);
+  MRB_ATTACH_FUNC(FrontFace, 1);
+  MRB_ATTACH_FUNC(GenBuffers, 2);
+  MRB_ATTACH_FUNC(GenerateMipmap, 1);
+  MRB_ATTACH_FUNC(GenFramebuffers, 2);
+  MRB_ATTACH_FUNC(GenRenderbuffers, 2);
+  MRB_ATTACH_FUNC(GenTextures, 2);
+  MRB_ATTACH_FUNC(GetActiveAttrib, 7);
+  MRB_ATTACH_FUNC(GetActiveUniform, 7);
+
+  /* TODO: Get* functions are a little complicated to handle, will come back later. */
+  /* MRB_ATTACH_FUNC(GetAttachedShaders, 4); */
+  /* MRB_ATTACH_FUNC(GetAttribLocation, 2); */
+  /* MRB_ATTACH_FUNC(GetBooleanv, 2); */
+  /* MRB_ATTACH_FUNC(GetBufferParameteriv, 3); */
+  /* MRB_ATTACH_FUNC(GetError, 1); */
+  /* MRB_ATTACH_FUNC(GetFloatv, 2); */
+  /* MRB_ATTACH_FUNC(GetFramebufferAttachmentParameteriv, 4); */
+  /* MRB_ATTACH_FUNC(GetIntegerv, 2); */
+  /* MRB_ATTACH_FUNC(GetProgramiv, 3); */
+  /* MRB_ATTACH_FUNC(GetProgramInfoLog, 4); */
+  /* MRB_ATTACH_FUNC(GetRenderbufferParameteriv, 3); */
+  /* MRB_ATTACH_FUNC(GetShaderiv, 3); */
+  /* MRB_ATTACH_FUNC(GetShaderInfoLog, 4); */
+  /* MRB_ATTACH_FUNC(GetShaderPrecisionFormat, 4); */
+  /* MRB_ATTACH_FUNC(GetShaderSource, 4); */
+  /* MRB_ATTACH_FUNC(GetString, 1); */
+  /* MRB_ATTACH_FUNC(GetTexParameterfv, 3); */
+  /* MRB_ATTACH_FUNC(GetTexParameteriv, 3); */
+  /* MRB_ATTACH_FUNC(GetUniformfv, 3); */
+  /* MRB_ATTACH_FUNC(GetUniformiv, 3); */
+  /* MRB_ATTACH_FUNC(GetUniformLocation, 2); */
+  /* MRB_ATTACH_FUNC(GetVertexAttribfv, 3); */
+  /* MRB_ATTACH_FUNC(GetVertexAttribiv, 3); */
+  /* MRB_ATTACH_FUNC(GetVertexAttribPointerv, 3); */
+
+  MRB_ATTACH_FUNC(Hint, 2);
+  MRB_ATTACH_FUNC(IsBuffer, 1);
+  MRB_ATTACH_FUNC(IsEnabled, 1);
+  MRB_ATTACH_FUNC(IsFramebuffer, 1);
+  MRB_ATTACH_FUNC(IsProgram, 1);
+  MRB_ATTACH_FUNC(IsRenderbuffer, 1);
+  MRB_ATTACH_FUNC(IsShader, 1);
+  MRB_ATTACH_FUNC(IsTexture, 1);
+  MRB_ATTACH_FUNC(LineWidth, 1);
+  MRB_ATTACH_FUNC(LinkProgram, 1);
+  MRB_ATTACH_FUNC(PixelStorei, 2);
+  MRB_ATTACH_FUNC(PolygonOffset, 2);
+
+  /* MRB_ATTACH_FUNC(ReadPixels, 7); */
+
+  MRB_ATTACH_FUNC(ReleaseShaderCompiler, 1);
+  MRB_ATTACH_FUNC(RenderbufferStorage, 4);
+
+  /* MRB_ATTACH_FUNC(SampleCoverage, 2); */
+  /* MRB_ATTACH_FUNC(Scissor, 4); */
+  /* MRB_ATTACH_FUNC(ShaderBinary, 5); */
+  /* MRB_ATTACH_FUNC(ShaderSource, 4); */
+  /* MRB_ATTACH_FUNC(StencilFunc, 3); */
+  /* MRB_ATTACH_FUNC(StencilFuncSeparate, 4); */
+  /* MRB_ATTACH_FUNC(StencilMask, 1); */
+  /* MRB_ATTACH_FUNC(StencilMaskSeparate, 2); */
+  /* MRB_ATTACH_FUNC(StencilOp, 3); */
+  /* MRB_ATTACH_FUNC(StencilOpSeparate, 4); */
+  /* MRB_ATTACH_FUNC(TexImage2D, 9); */
+  /* MRB_ATTACH_FUNC(TexParameterf, 3); */
+  /* MRB_ATTACH_FUNC(TexParameterfv, 3); */
+  /* MRB_ATTACH_FUNC(TexParameteri, 3); */
+  /* MRB_ATTACH_FUNC(TexParameteriv, 3); */
+  /* MRB_ATTACH_FUNC(TexSubImage2D, 9); */
+  /* MRB_ATTACH_FUNC(Uniform1f, 2); */
+  /* MRB_ATTACH_FUNC(Uniform1fv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform1i, 2); */
+  /* MRB_ATTACH_FUNC(Uniform1iv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform2f, 3); */
+  /* MRB_ATTACH_FUNC(Uniform2fv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform2i, 3); */
+  /* MRB_ATTACH_FUNC(Uniform2iv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform3f, 4); */
+  /* MRB_ATTACH_FUNC(Uniform3fv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform3i, 4); */
+  /* MRB_ATTACH_FUNC(Uniform3iv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform4f, 5); */
+  /* MRB_ATTACH_FUNC(Uniform4fv, 3); */
+  /* MRB_ATTACH_FUNC(Uniform4i, 5); */
+  /* MRB_ATTACH_FUNC(Uniform4iv, 3); */
+  /* MRB_ATTACH_FUNC(UniformMatrix2fv, 4); */
+  /* MRB_ATTACH_FUNC(UniformMatrix3fv, 4); */
+  /* MRB_ATTACH_FUNC(UniformMatrix4fv, 4); */
+  /* MRB_ATTACH_FUNC(UseProgram, 1); */
+  /* MRB_ATTACH_FUNC(ValidateProgram, 1); */
+  /* MRB_ATTACH_FUNC(VertexAttrib1f, 2); */
+  /* MRB_ATTACH_FUNC(VertexAttrib1fv, 2); */
+  /* MRB_ATTACH_FUNC(VertexAttrib2f, 3); */
+  /* MRB_ATTACH_FUNC(VertexAttrib2fv, 2); */
+  /* MRB_ATTACH_FUNC(VertexAttrib3f, 4); */
+  /* MRB_ATTACH_FUNC(VertexAttrib3fv, 2); */
+  /* MRB_ATTACH_FUNC(VertexAttrib4f, 5); */
+  /* MRB_ATTACH_FUNC(VertexAttrib4fv, 2); */
+  /* MRB_ATTACH_FUNC(VertexAttribPointer, 6); */
+  /* MRB_ATTACH_FUNC(Viewport, 4); */
 }

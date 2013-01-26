@@ -13,3 +13,7 @@ mrb_mruby_gles_gem_init(mrb_state* mrb)
   mrb_mruby_gles_gem_gl2ext_init(mrb);
 #endif
 }
+
+void mrb_mruby_gles_gem_final(mrb_state* mrb)
+{
+}

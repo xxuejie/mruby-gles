@@ -6,6 +6,8 @@
 
 #include <GL/glut.h>
 
+/* TODO: this is not finished yet! Most functions are not added here. */
+
 static mrb_value
 mrb_glut_init(mrb_state* mrb, mrb_value mod)
 {

@@ -2,7 +2,7 @@
 
 OpenGL ES 2.0 bindings for mruby.
 
-#Note
+#Why don't we use ffi?
 
 For the time being, I failed to find a proper implementation that works both when compiling mruby natively, and when using in [webruby](https://github.com/xxuejie/webruby). What's more, one design philosophy of mruby is not to include anything you do not need. Considering OpenGL ES does not require the full functionalities of ffi, it may be overkilled to introduce a ffi implementation here.
 

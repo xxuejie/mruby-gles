@@ -123,7 +123,7 @@ mrb_value float_buffer_to_mrb_array(mrb_state* mrb, const GLfloat* p, int len)
   mrb_value arr = mrb_ary_new_capa(mrb, len);
 
   for (i = 0; i < len; i++) {
-    mrb_ary_push(mrb, arr, mrb_float_value(p[i]));
+    mrb_ary_push(mrb, arr, mrb_float_value(mrb, p[i]));
   }
 
   return arr;
@@ -1266,7 +1266,7 @@ mrb_gl_get_tex_parameterfv(mrb_state* mrb, mrb_value mod)
   mrb_get_args(mrb, "ii", &target, &pname);
   glGetTexParameterfv((GLenum) target, (GLenum) pname, &params);
 
-  return mrb_float_value(params);
+  return mrb_float_value(mrb, params);
 }
 
 static mrb_value

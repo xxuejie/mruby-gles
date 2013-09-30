@@ -2183,15 +2183,13 @@ static mrb_value
 mrb_gl_vertex_attrib_pointer(mrb_state* mrb, mrb_value mod)
 {
   mrb_int indx, size, type, stride;
-  mrb_value normalized;
-  char* ptr;
-  int ptr_len;
+  mrb_value normalized, ptr;
 
-  mrb_get_args(mrb, "iiiois", &indx, &size, &type, &normalized,
-               &stride, &ptr, &ptr_len);
+  mrb_get_args(mrb, "iiioio", &indx, &size, &type, &normalized,
+               &stride, &ptr);
   glVertexAttribPointer((GLuint) indx, (GLint) size, (GLenum) type,
                         MRB_VALUE_TO_GL_BOOLEAN(normalized),
-                        (GLsizei) stride, (const GLvoid*) ptr);
+                        (GLsizei) stride, (const GLvoid*) mrb_cptr(ptr));
 
   return mrb_nil_value();
 }

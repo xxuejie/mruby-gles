@@ -2532,7 +2532,9 @@ mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
   mrb_define_const(mrb, mod_gl2, "GL_RGB5_A1", mrb_fixnum_value(GL_RGB5_A1));
   mrb_define_const(mrb, mod_gl2, "GL_RGB565", mrb_fixnum_value(GL_RGB565));
   mrb_define_const(mrb, mod_gl2, "GL_DEPTH_COMPONENT16", mrb_fixnum_value(GL_DEPTH_COMPONENT16));
+#ifdef GL_STENCIL_INDEX
   mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX", mrb_fixnum_value(GL_STENCIL_INDEX));
+#endif
   mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX8", mrb_fixnum_value(GL_STENCIL_INDEX8));
 
   mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_WIDTH", mrb_fixnum_value(GL_RENDERBUFFER_WIDTH));

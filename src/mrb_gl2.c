@@ -2183,15 +2183,25 @@ static mrb_value
 mrb_gl_vertex_attrib_pointer(mrb_state* mrb, mrb_value mod)
 {
   mrb_int indx, size, type, stride;
-  mrb_value normalized;
-  char* ptr;
-  int ptr_len;
+  mrb_value normalized, ptr;
 
-  mrb_get_args(mrb, "iiiois", &indx, &size, &type, &normalized,
-               &stride, &ptr, &ptr_len);
+  mrb_get_args(mrb, "iiioio", &indx, &size, &type, &normalized,
+               &stride, &ptr);
+  GLvoid const *p;
+  switch (mrb_type(ptr)) {
+  case MRB_TT_STRING:
+    p = RSTRING_PTR(ptr);
+    break;
+  case MRB_TT_CPTR:
+    p = mrb_cptr(ptr);
+    break;
+  default:
+    mrb_raise(mrb, E_TYPE_ERROR, "expected String/Cptr");
+    break;
+  }
   glVertexAttribPointer((GLuint) indx, (GLint) size, (GLenum) type,
                         MRB_VALUE_TO_GL_BOOLEAN(normalized),
-                        (GLsizei) stride, (const GLvoid*) ptr);
+                        (GLsizei) stride, p);
 
   return mrb_nil_value();
 }
@@ -2532,7 +2542,9 @@ mrb_mruby_gles_gem_gl2_init(mrb_state* mrb)
   mrb_define_const(mrb, mod_gl2, "GL_RGB5_A1", mrb_fixnum_value(GL_RGB5_A1));
   mrb_define_const(mrb, mod_gl2, "GL_RGB565", mrb_fixnum_value(GL_RGB565));
   mrb_define_const(mrb, mod_gl2, "GL_DEPTH_COMPONENT16", mrb_fixnum_value(GL_DEPTH_COMPONENT16));
+#ifdef GL_STENCIL_INDEX
   mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX", mrb_fixnum_value(GL_STENCIL_INDEX));
+#endif
   mrb_define_const(mrb, mod_gl2, "GL_STENCIL_INDEX8", mrb_fixnum_value(GL_STENCIL_INDEX8));
 
   mrb_define_const(mrb, mod_gl2, "GL_RENDERBUFFER_WIDTH", mrb_fixnum_value(GL_RENDERBUFFER_WIDTH));
